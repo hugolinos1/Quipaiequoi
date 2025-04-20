@@ -13,23 +13,25 @@ interface AnalysisResult {
 
 const Index = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileDownloadURL, setFileDownloadURL] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
 
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = (file: File, downloadURL?: string) => {
     setSelectedFile(file);
+    setFileDownloadURL(downloadURL || null);
     setResult(null);
   };
 
   const analyzeInvoice = async () => {
-    if (!selectedFile) {
+    if (!selectedFile || !fileDownloadURL) {
       toast.error("Veuillez d'abord sélectionner une facture");
       return;
     }
 
     setIsAnalyzing(true);
     try {
-      // Simulation d'analyse pour le moment
+      // TODO: Remplacer par l'appel API Mistral
       await new Promise(resolve => setTimeout(resolve, 2000));
       setResult({
         date: "2024-04-20",
@@ -77,3 +79,4 @@ const Index = () => {
 };
 
 export default Index;
+

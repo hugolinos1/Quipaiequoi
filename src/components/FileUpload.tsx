@@ -4,9 +4,12 @@ import { useDropzone } from 'react-dropzone';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
+import { toast } from 'sonner';
 
 interface FileUploadProps {
-  onFileSelect: (file: File) => void;
+  onFileSelect: (file: File, downloadURL?: string) => void;
 }
 
 export const FileUpload = ({ onFileSelect }: FileUploadProps) => {
@@ -15,12 +18,25 @@ export const FileUpload = ({ onFileSelect }: FileUploadProps) => {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
-      onFileSelect(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const storageRef = ref(storage, `invoices/${file.name}`);
+      
+      uploadBytes(storageRef, file)
+        .then((snapshot) => {
+          getDownloadURL(snapshot.ref)
+            .then((downloadURL) => {
+              onFileSelect(file, downloadURL);
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                setPreview(reader.result as string);
+              };
+              reader.readAsDataURL(file);
+              toast.success('Facture téléchargée avec succès');
+            });
+        })
+        .catch((error) => {
+          console.error('Erreur de téléchargement', error);
+          toast.error('Échec du téléchargement de la facture');
+        });
     }
   }, [onFileSelect]);
 
@@ -63,3 +79,4 @@ export const FileUpload = ({ onFileSelect }: FileUploadProps) => {
     </div>
   );
 };
+
