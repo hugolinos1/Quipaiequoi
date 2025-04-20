@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { FileUpload } from '@/components/FileUpload';
 import { ResultDisplay } from '@/components/ResultDisplay';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { analyzeInvoice } from '@/services/invoiceService';
 
 interface AnalysisResult {
   date: string;
@@ -31,13 +31,8 @@ const Index = () => {
 
     setIsAnalyzing(true);
     try {
-      // TODO: Remplacer par l'appel API Mistral
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setResult({
-        date: "2024-04-20",
-        montant: "150,00 €",
-        typeDepense: "Services professionnels"
-      });
+      const analysisResult = await analyzeInvoice(fileDownloadURL);
+      setResult(analysisResult);
       toast.success("Analyse terminée avec succès !");
     } catch (error) {
       toast.error("Erreur lors de l'analyse de la facture");
@@ -79,4 +74,3 @@ const Index = () => {
 };
 
 export default Index;
-
